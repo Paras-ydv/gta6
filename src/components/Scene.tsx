@@ -1,4 +1,5 @@
 import { PALM_PATHS } from "@/lib/palm";
+import SceneMotion from "./SceneMotion";
 
 function Palm({ className, flip }: { className: string; flip?: boolean }) {
   return (
@@ -10,51 +11,71 @@ function Palm({ className, flip }: { className: string; flip?: boolean }) {
   );
 }
 
-// Original illustrated coastline at dusk. Pure CSS/SVG, no images, transform/opacity animations only.
+// Layer wrapper: --d is the parallax depth (bigger = closer to the viewer = moves more).
+const Layer = ({ d, className = "", children }: { d: number; className?: string; children: React.ReactNode }) => (
+  <div className={`layer absolute inset-0 ${className}`} style={{ ["--d" as string]: d }}>
+    {children}
+  </div>
+);
+
+// Original illustrated coastline. Pure CSS/SVG, transform/opacity animations only.
+// SceneMotion drives parallax (scroll + pointer) and the day/night phase.
 export default function Scene() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div id="scene" aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div className="sky absolute inset-0" />
-      <div className="stars absolute inset-x-0 top-0 h-1/2" />
+      <Layer d={1}>
+        <div className="stars absolute inset-x-0 top-0 h-1/2" />
+        <div className="stars stars-2 absolute inset-x-0 top-0 h-1/2" />
+      </Layer>
 
-      {/* sun sitting on the horizon */}
-      <div className="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-[88%]">
-        <div className="sun h-[min(74vw,400px)] w-[min(74vw,400px)] rounded-full" />
-      </div>
+      {/* sun (or moon at night) sitting on the horizon */}
+      <Layer d={3} className="sun-layer">
+        <div className="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-[88%]">
+          <div className="sun h-[min(74vw,400px)] w-[min(74vw,400px)] rounded-full" />
+        </div>
+      </Layer>
 
-      {/* city skyline with lit windows */}
-      <svg viewBox="0 0 400 60" preserveAspectRatio="none" className="absolute inset-x-0 top-[58%] h-[8vh] w-full -translate-y-full">
-        <path
-          d="M0 60 V40 h14 v-8 h10 v12 h8 V22 h12 v38 h6 V34 h16 v-6 h6 v32 h10 V14 h4 v-6 h4 v6 h4 v46 h12 V30 h18 v30 h8 V38 h10 v-8 h12 v30 h6 V18 h16 v42 h10 V36 h14 v24 h8 V26 h6 v-6 h6 v40 h12 V32 h20 v28 h10 V44 h12 v16 h8 V24 h14 v36 h10 V40 h16 v20 Z"
-          fill="#12052e"
-        />
-        <g fill="#ffcf6d" opacity="0.7" className="windows">
-          <rect x="35" y="27" width="2" height="2" />
-          <rect x="39" y="33" width="2" height="2" />
-          <rect x="92" y="20" width="2" height="2" />
-          <rect x="96" y="28" width="2" height="2" />
-          <rect x="92" y="38" width="2" height="2" />
-          <rect x="178" y="24" width="2" height="2" />
-          <rect x="183" y="32" width="2" height="2" />
-          <rect x="262" y="30" width="2" height="2" />
-          <rect x="300" y="38" width="2" height="2" />
-          <rect x="356" y="30" width="2" height="2" />
-          <rect x="360" y="40" width="2" height="2" />
-        </g>
-      </svg>
+      {/* skyline with lit windows and a neon motel sign */}
+      <Layer d={6}>
+        <svg viewBox="0 0 400 60" preserveAspectRatio="none" className="absolute inset-x-0 top-[58%] h-[8vh] w-full -translate-y-full">
+          <path
+            d="M0 60 V40 h14 v-8 h10 v12 h8 V22 h12 v38 h6 V34 h16 v-6 h6 v32 h10 V14 h4 v-6 h4 v6 h4 v46 h12 V30 h18 v30 h8 V38 h10 v-8 h12 v30 h6 V18 h16 v42 h10 V36 h14 v24 h8 V26 h6 v-6 h6 v40 h12 V32 h20 v28 h10 V44 h12 v16 h8 V24 h14 v36 h10 V40 h16 v20 Z"
+            fill="#12052e"
+          />
+          <g fill="#ffcf6d" className="windows">
+            {[
+              [35, 27], [39, 33], [92, 20], [96, 28], [92, 38], [96, 46], [178, 24], [183, 32], [178, 44],
+              [262, 30], [266, 40], [300, 38], [304, 46], [356, 30], [360, 40], [214, 34], [138, 36], [330, 46],
+            ].map(([x, y], i) => (
+              <rect key={i} x={x} y={y} width="2" height="2" style={{ animationDelay: `${(i % 5) * 0.7}s` }} />
+            ))}
+          </g>
+        </svg>
+
+        <div className="motel absolute left-[7%] top-[58%] hidden -translate-y-[calc(8vh+100%)] lg:block xl:left-[11%]">
+          <div className="motel-sign rounded-md border-2 border-pink/80 bg-[#0b0420]/90 px-2 pb-1 pt-0.5 text-center shadow-[0_0_18px_rgba(255,61,129,0.6)]">
+            <div className="font-script neon-pink text-lg leading-tight sm:text-2xl">Bunk Motel</div>
+            <div className="font-display flicker-hard text-[9px] tracking-[0.25em] text-teal sm:text-[11px]">NO LEAVE · VACANCY</div>
+          </div>
+          <div className="mx-auto h-3 w-1 bg-[#12052e]" />
+        </div>
+      </Layer>
 
       {/* police helicopter with sweeping searchlight */}
-      <div className="heli absolute right-[12%] top-[14%]">
-        <div className="searchlight absolute left-[22px] top-[18px] h-[70vh] w-[140px] origin-top" />
-        <svg viewBox="0 0 80 32" className="relative w-16 sm:w-20">
-          <rect className="rotor" x="4" y="3" width="56" height="2" rx="1" fill="#05010f" />
-          <rect x="29" y="4" width="3" height="5" fill="#05010f" />
-          <ellipse cx="30" cy="16" rx="14" ry="8" fill="#05010f" />
-          <path d="M42 13 L74 11 L74 16 L42 19 Z M69 5 L76 5 L74 14 L69 14 Z" fill="#05010f" />
-          <path d="M18 27 H44 M24 23 V27 M38 23 V27" stroke="#05010f" strokeWidth="2" />
-          <circle className="beacon" cx="74" cy="11" r="1.6" fill="#ff3b3b" />
-        </svg>
-      </div>
+      <Layer d={9}>
+        <div className="heli absolute right-[12%] top-[14%]">
+          <div className="searchlight absolute left-[22px] top-[18px] h-[70vh] w-[140px] origin-top" />
+          <svg viewBox="0 0 80 32" className="relative w-16 sm:w-20">
+            <rect className="rotor" x="4" y="3" width="56" height="2" rx="1" fill="#05010f" />
+            <rect x="29" y="4" width="3" height="5" fill="#05010f" />
+            <ellipse cx="30" cy="16" rx="14" ry="8" fill="#05010f" />
+            <path d="M42 13 L74 11 L74 16 L42 19 Z M69 5 L76 5 L74 14 L69 14 Z" fill="#05010f" />
+            <path d="M18 27 H44 M24 23 V27 M38 23 V27" stroke="#05010f" strokeWidth="2" />
+            <circle className="beacon" cx="74" cy="11" r="1.6" fill="#ff3b3b" />
+          </svg>
+        </div>
+      </Layer>
 
       {/* horizon glow */}
       <div className="absolute inset-x-0 top-[58%] h-px bg-teal shadow-[0_0_18px_4px_rgba(34,227,211,0.8)]" />
@@ -101,13 +122,17 @@ export default function Scene() {
       <div className="siren-red absolute -bottom-24 -left-24 h-72 w-72 rounded-full" />
       <div className="siren-blue absolute -bottom-24 -right-24 h-72 w-72 rounded-full" />
 
-      <Palm className="absolute -left-12 bottom-[6%] h-[52vh] w-auto" />
-      <Palm className="absolute left-12 bottom-[9%] h-[30vh] w-auto opacity-95" flip />
-      <Palm className="absolute -right-14 bottom-[5%] h-[58vh] w-auto" flip />
-      <Palm className="absolute right-14 bottom-[10%] h-[26vh] w-auto opacity-95" />
+      {/* foreground palms move the most */}
+      <Layer d={18}>
+        <Palm className="absolute -left-12 bottom-[6%] h-[52vh] w-auto" />
+        <Palm className="absolute left-12 bottom-[9%] h-[30vh] w-auto opacity-95" flip />
+        <Palm className="absolute -right-14 bottom-[5%] h-[58vh] w-auto" flip />
+        <Palm className="absolute right-14 bottom-[10%] h-[26vh] w-auto opacity-95" />
+      </Layer>
 
       <div className="scanlines absolute inset-0" />
       <div className="vignette absolute inset-0" />
+      <SceneMotion />
     </div>
   );
 }

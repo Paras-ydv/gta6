@@ -39,8 +39,16 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${anton.variable} ${inter.variable} ${mrDafoe.variable}`}>
-      <body className="min-h-dvh">{children}</body>
+    <html lang="en" suppressHydrationWarning className={`${anton.variable} ${inter.variable} ${mrDafoe.variable}`}>
+      <body className="min-h-dvh">
+        {/* Set day/night before first paint so the scene doesn't flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var h=new Date().getHours();document.documentElement.dataset.phase=h>=19||h<5?"night":"dusk"}catch(e){}`,
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
