@@ -14,7 +14,7 @@ type NetInfo = { saveData?: boolean; effectiveType?: string };
  * fades in once YouTube reports it is actually playing, so if autoplay is blocked
  * (Low Power Mode, data saver) the CSS scene underneath simply stays visible.
  */
-export default function BgVideo() {
+function YouTubeBg() {
   const frame = useRef<HTMLIFrameElement>(null);
   const [src, setSrc] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -177,4 +177,79 @@ export default function BgVideo() {
       )}
     </>
   );
+}
+
+// Self-hosted clip you have the rights to (e.g. your own gameplay recording).
+// Set NEXT_PUBLIC_BG_VIDEO_URL=/bg.mp4 (file in /public) or a CDN URL to use it.
+const LOCAL_SRC = process.env.NEXT_PUBLIC_BG_VIDEO_URL;
+const LOCAL_POSTER = process.env.NEXT_PUBLIC_BG_VIDEO_POSTER;
+
+function LocalBg({ src }: { src: string }) {
+  const video = useRef<HTMLVideoElement>(null);
+  const [allowed, setAllowed] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const net = (navigator as Navigator & { connection?: NetInfo }).connection;
+    if (net?.saveData || /(^|-)2g$/.test(net?.effectiveType ?? "")) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const go = () => setAllowed(true);
+    if (document.readyState === "complete") go();
+    else window.addEventListener("load", go, { once: true });
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.video = playing ? "on" : "off";
+    const v = video.current;
+    if (!v) return;
+    const onVis = () =>
+      document.hidden ? v.pause() : v.play().catch(() => {});
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [playing]);
+
+  if (!allowed) return null;
+  return (
+    <>
+      <div
+        aria-hidden
+        className={`bg-video pointer-events-none fixed inset-0 -z-10 overflow-hidden ${playing ? "is-playing" : ""}`}
+      >
+        <video
+          ref={video}
+          src={src}
+          poster={LOCAL_POSTER}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onPlaying={() => setPlaying(true)}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,6,32,0.55)_0%,rgba(11,6,32,0.35)_40%,rgba(11,6,32,0.75)_100%)]" />
+        <div className="scanlines absolute inset-0" />
+        <div className="vignette absolute inset-0" />
+      </div>
+      {playing && (
+        <button
+          onClick={() => {
+            const v = video.current;
+            if (!v) return;
+            v.muted = !v.muted;
+            setMuted(v.muted);
+          }}
+          className="fade-in fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 rounded-full border border-white/20 bg-black/55 px-3.5 py-2 text-xs font-semibold text-ink backdrop-blur hover:border-pink/70"
+        >
+          {muted ? "Sound on" : "Mute"}
+        </button>
+      )}
+    </>
+  );
+}
+
+/** Background video: your own clip if NEXT_PUBLIC_BG_VIDEO_URL is set, otherwise the official YouTube trailer. */
+export default function BgVideo() {
+  return LOCAL_SRC ? <LocalBg src={LOCAL_SRC} /> : <YouTubeBg />;
 }
