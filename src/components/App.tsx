@@ -12,6 +12,7 @@ import Countdown from "./Countdown";
 import Leaderboards from "./Leaderboards";
 import Stories from "./Stories";
 import Ticker from "./Ticker";
+import News from "./News";
 import BunkFlow, { STORAGE_KEY } from "./BunkFlow";
 import { Icon, Stars } from "./Icon";
 import {
@@ -242,6 +243,7 @@ export default function App({ shared }: { shared?: Shared }) {
         className="mx-auto grid w-full max-w-6xl scroll-mt-4 gap-5 px-4 py-10 sm:px-6"
       >
         <Leaderboards stats={stats} />
+        <News />
         <Stories
           stories={stats?.stories ?? []}
           onWrite={() => (result ? setOpen(true) : start("bunk"))}
