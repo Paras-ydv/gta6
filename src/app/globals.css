@@ -247,6 +247,33 @@ body {
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
 }
 
+/* ---------- Background trailer ---------- */
+.bg-video {
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  background: var(--navy);
+}
+.bg-video.is-playing {
+  opacity: 1;
+}
+.bg-video-frame {
+  /* cover the viewport at 16:9, like object-fit: cover */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100vw, 177.78vh);
+  height: max(100vh, 56.25vw);
+  transform: translate(-50%, -50%);
+  border: 0;
+  pointer-events: none;
+}
+@media (min-aspect-ratio: 4/3) {
+  /* crop the trailer's own cinemascope letterbox bars on landscape screens */
+  .bg-video-frame {
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+}
+
 /* ---------- Parallax ---------- */
 .layer {
   /* --px/--py: pointer offset (-0.5..0.5), --sy: scroll px, --d: depth */

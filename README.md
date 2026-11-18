@@ -2,7 +2,9 @@
 
 A live, worldwide counter of everyone skipping college or work for GTA 6 (out **19 Nov 2026**, midnight local time), plus everyone who *couldn't* skip. It has one giant number, a 3-tap flow, share cards for X and WhatsApp, live leaderboards and an anonymous stories wall.
 
-Unofficial fan page. Not affiliated with Rockstar Games or Take-Two. It uses no official logos, fonts, screenshots or artwork; all scenery and icons are original CSS/SVG.
+Unofficial fan page. Not affiliated with Rockstar Games or Take-Two. Scenery and icons are original CSS/SVG. The page background plays Rockstar's official launch trailer, embedded from their YouTube channel.
+
+**Background trailer** (`src/components/BgVideo.tsx`): a muted, looping YouTube embed of video `rz1B4B2yBZY` (Rockstar Games' official upload, verified 18 Nov 2026). It loads after first paint and fades in only once YouTube reports it is playing. Subtitles are forced off, and it pauses when the tab is hidden. It is skipped entirely for data-saver users, 2G connections and reduced-motion users. If autoplay is blocked (for example iPhone Low Power Mode), the animated CSS scene shows instead. YouTube's embed policy doesn't allow overlays on its player, so if YouTube ever restricts the embed, the CSS scene simply takes over.
 
 **Stack:** Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind v4 · Upstash Redis · `@upstash/ratelimit` · `next/og` (Satori / `@vercel/og`) · Vercel.
 

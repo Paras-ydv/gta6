@@ -14,7 +14,6 @@ import Stories from "./Stories";
 import Ticker from "./Ticker";
 import BunkFlow, { STORAGE_KEY } from "./BunkFlow";
 import { Icon, Stars } from "./Icon";
-import { TrailerModal, TrailerPill, TrailerSection } from "./Trailer";
 import {
   fmt,
   isCity,
@@ -60,8 +59,6 @@ export default function App({ shared }: { shared?: Shared }) {
   const [sessionResult, setSessionResult] = useState<BunkResult | null>(null);
   const [open, setOpen] = useState(false);
   const [side, setSide] = useState<Side>("bunk");
-  const [trailer, setTrailer] = useState(false);
-  const closeTrailer = useCallback(() => setTrailer(false), []);
 
   const raw = useSyncExternalStore(subscribeStorage, readStorage, () => null);
   const stored = useMemo<BunkResult | null>(() => {
@@ -169,9 +166,6 @@ export default function App({ shared }: { shared?: Shared }) {
           )}
 
           <Countdown today={stats?.today ?? null} />
-          <div className="mt-3">
-            <TrailerPill onOpen={() => setTrailer(true)} />
-          </div>
 
           <div className="hero-scrim mt-6 flex flex-col items-center">
             <div>
@@ -247,7 +241,6 @@ export default function App({ shared }: { shared?: Shared }) {
         id="boards"
         className="mx-auto grid w-full max-w-6xl scroll-mt-4 gap-5 px-4 py-10 sm:px-6"
       >
-        <TrailerSection onOpen={() => setTrailer(true)} />
         <Leaderboards stats={stats} />
         <Stories
           stories={stats?.stories ?? []}
@@ -267,8 +260,6 @@ export default function App({ shared }: { shared?: Shared }) {
           @parascodes
         </a>
       </footer>
-
-      <TrailerModal open={trailer} onClose={closeTrailer} />
       <BunkFlow
         key={side}
         open={open}

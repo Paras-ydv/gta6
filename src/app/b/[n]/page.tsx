@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import App, { type Shared } from "@/components/App";
 import Scene from "@/components/Scene";
+import BgVideo from "@/components/BgVideo";
 import { isCity, isCountry, isExcuse, isReason, locationLabel, whyLabel } from "@/lib/data";
 
 // Share link: /b/14383?e=fever&co=in&c=bangalore   (add &t=stuck for the "busted" side)
@@ -60,6 +61,7 @@ export default function SharedPage(props: Props) {
   return (
     <>
       <Scene />
+      <BgVideo />
       <Suspense fallback={<App />}>
         <SharedApp {...props} />
       </Suspense>
